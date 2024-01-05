@@ -12,9 +12,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,16 +28,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material.icons.rounded.ArrowLeft
 import androidx.compose.material.icons.rounded.ArrowRight
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.DoneAll
+import androidx.compose.material.icons.rounded.RemoveDone
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -49,10 +59,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
+import androidx.compose.ui.unit.toIntRect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.adorastudios.tomorrowapp.R
@@ -72,6 +86,11 @@ fun TodoListScreen(
     val state = viewModel.state.value
 
     Box(modifier = Modifier.fillMaxSize()) {
+        val editMode by remember(state.selectedTodos) {
+            derivedStateOf {
+                state.selectedTodos.isNotEmpty()
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -93,163 +112,65 @@ fun TodoListScreen(
                     viewModel.onEvent(TodoListEvent.TopTileEvent.ChangeMoveDoneToPast(it))
                 },
             )
-            val showTimeOptions = updateTransition(
-                targetState = state.timeTileOpen,
-                label = "showTimeOptions",
-            )
-            val doteColor by showTimeOptions.animateColor(
-                label = "doteColor",
-            ) { open ->
-                if (open) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier = Modifier.size(48.dp),
-                )
-                Column(
-                    modifier = Modifier.weight(1f),
-                ) {
-                    showTimeOptions.AnimatedVisibility(
-                        modifier = Modifier.fillMaxWidth(),
-                        visible = {
-                            it || state.timePeriod == TimePeriod.Past
-                        },
-                        enter = fadeIn() + expandVertically(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        TextButton(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            onClick = {
-                                viewModel.onEvent(
-                                    TodoListEvent.TimeTileEvent.ChangeTimePeriod(TimePeriod.Past),
-                                )
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            enabled = state.timePeriod != TimePeriod.Past,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowRight,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Past) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Past) doteColor else Color.Transparent,
-                            )
-                            Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "Past",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowLeft,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Past) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Past) doteColor else Color.Transparent,
-                            )
-                        }
-                    }
-                    showTimeOptions.AnimatedVisibility(
-                        modifier = Modifier.fillMaxWidth(),
-                        visible = {
-                            it || state.timePeriod == TimePeriod.Today
-                        },
-                        enter = fadeIn() + expandVertically(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        TextButton(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            onClick = {
-                                viewModel.onEvent(
-                                    TodoListEvent.TimeTileEvent.ChangeTimePeriod(TimePeriod.Today),
-                                )
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            enabled = state.timePeriod != TimePeriod.Today,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowRight,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Today) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Today) doteColor else Color.Transparent,
-                            )
-                            Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "Today",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowLeft,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Today) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Today) doteColor else Color.Transparent,
-                            )
-                        }
-                    }
-                    showTimeOptions.AnimatedVisibility(
-                        modifier = Modifier.fillMaxWidth(),
-                        visible = {
-                            it || state.timePeriod == TimePeriod.Future
-                        },
-                        enter = fadeIn() + expandVertically(),
-                        exit = shrinkVertically() + fadeOut(),
-                    ) {
-                        TextButton(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            onClick = {
-                                viewModel.onEvent(
-                                    TodoListEvent.TimeTileEvent.ChangeTimePeriod(TimePeriod.Future),
-                                )
-                            },
-                            colors = ButtonDefaults.textButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                disabledContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                            enabled = state.timePeriod != TimePeriod.Future,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowRight,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Future) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Future) doteColor else Color.Transparent,
-                            )
-                            Text(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                text = "Future",
-                                style = MaterialTheme.typography.titleMedium,
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.ArrowLeft,
-                                contentDescription = stringResource(id = if (state.timePeriod == TimePeriod.Future) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
-                                tint = if (state.timePeriod == TimePeriod.Future) doteColor else Color.Transparent,
-                            )
-                        }
-                    }
-                }
-                IconButton(onClick = {
-                    viewModel.onEvent(
-                        TodoListEvent.TimeTileEvent.OpenTimeTile(
-                            !showTimeOptions.currentState,
-                        ),
-                    )
-                }) {
-                    showTimeOptions.AnimatedContent {
-                        when (it) {
-                            true -> {
-                                Icon(
-                                    imageVector = Icons.Rounded.ArrowDropUp,
-                                    contentDescription = stringResource(id = R.string.contentDescription_closeTime),
-                                )
-                            }
 
-                            false -> {
+            AnimatedContent(
+                targetState = editMode,
+                label = "editMode",
+                transitionSpec = { expandVertically() togetherWith shrinkVertically() },
+            ) { targetState ->
+                when (targetState) {
+                    true -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                        ) {
+                            IconButton(onClick = {
+                                viewModel.onEvent(TodoListEvent.SelectionEvent.Delete)
+                            }) {
                                 Icon(
-                                    imageVector = Icons.Rounded.AccessTime,
-                                    contentDescription = stringResource(id = R.string.contentDescription_openTime),
+                                    imageVector = Icons.Rounded.DeleteForever,
+                                    contentDescription = stringResource(id = R.string.contentDescription_deleteTodos),
+                                )
+                            }
+                            IconButton(onClick = {
+                                viewModel.onEvent(TodoListEvent.SelectionEvent.Check)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.DoneAll,
+                                    contentDescription = stringResource(id = R.string.contentDescription_doneTodos),
+                                )
+                            }
+                            IconButton(onClick = {
+                                viewModel.onEvent(TodoListEvent.SelectionEvent.Uncheck)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.RemoveDone,
+                                    contentDescription = stringResource(id = R.string.contentDescription_notDoneTodos),
+                                )
+                            }
+                            IconButton(onClick = {
+                                viewModel.onEvent(TodoListEvent.SelectionEvent.Deselect)
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Close,
+                                    contentDescription = stringResource(id = R.string.contentDescription_cancelSelection),
                                 )
                             }
                         }
+                    }
+
+                    false -> {
+                        TimeTile(
+                            modifier = Modifier.fillMaxWidth(),
+                            timePeriod = state.timePeriod,
+                            timeTileOpen = state.timeTileOpen,
+                            onChangeTimePeriod = {
+                                viewModel.onEvent(TodoListEvent.TimeTileEvent.ChangeTimePeriod(it))
+                            },
+                            onOpenTimeTile = {
+                                viewModel.onEvent(TodoListEvent.TimeTileEvent.OpenTimeTile(it))
+                            },
+                        )
                     }
                 }
             }
@@ -292,14 +213,29 @@ fun TodoListScreen(
                         onNavigate = { item ->
                             navController.navigate(Screens.AddEditTodo.route + "?todoId=${item.id}")
                         },
-                        onDone = { item, done ->
+                        onDone = { item ->
                             viewModel.onEvent(
-                                TodoListEvent.TodoEvent.Done(
-                                    item,
-                                    done,
+                                TodoListEvent.TodoEvent.Done(item),
+                            )
+                        },
+                        onSelect = { id, forceSelect ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.Selected(
+                                    id,
+                                    forceSelect,
                                 ),
                             )
                         },
+                        onSelectRange = { initial, previous, current ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.SelectedRange(
+                                    initial,
+                                    previous,
+                                    current,
+                                ),
+                            )
+                        },
+                        selectionMode = editMode,
                         timePeriod = TimePeriod.Past,
                     )
                 }
@@ -322,14 +258,29 @@ fun TodoListScreen(
                         onNavigate = { item ->
                             navController.navigate(Screens.AddEditTodo.route + "?todoId=${item.id}")
                         },
-                        onDone = { item, done ->
+                        onDone = { item ->
                             viewModel.onEvent(
-                                TodoListEvent.TodoEvent.Done(
-                                    item,
-                                    done,
+                                TodoListEvent.TodoEvent.Done(item),
+                            )
+                        },
+                        onSelect = { id, forceSelect ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.Selected(
+                                    id,
+                                    forceSelect,
                                 ),
                             )
                         },
+                        onSelectRange = { initial, previous, current ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.SelectedRange(
+                                    initial,
+                                    previous,
+                                    current,
+                                ),
+                            )
+                        },
+                        selectionMode = editMode,
                         timePeriod = TimePeriod.Today,
                     )
                 }
@@ -348,31 +299,217 @@ fun TodoListScreen(
                         onNavigate = { item ->
                             navController.navigate(Screens.AddEditTodo.route + "?todoId=${item.id}")
                         },
-                        onDone = { item, done ->
+                        onDone = { item ->
                             viewModel.onEvent(
-                                TodoListEvent.TodoEvent.Done(
-                                    item,
-                                    done,
+                                TodoListEvent.TodoEvent.Done(item),
+                            )
+                        },
+                        onSelect = { id, forceSelect ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.Selected(
+                                    id,
+                                    forceSelect,
                                 ),
                             )
                         },
+                        onSelectRange = { initial, previous, current ->
+                            viewModel.onEvent(
+                                TodoListEvent.SelectionEvent.SelectedRange(
+                                    initial,
+                                    previous,
+                                    current,
+                                ),
+                            )
+                        },
+                        selectionMode = editMode,
                         timePeriod = TimePeriod.Future,
                     )
                 }
             }
         }
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = 16.dp),
-            onClick = {
-                navController.navigate(Screens.toAddEditScreen())
-            },
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            visible = !editMode,
+            enter = fadeIn() + slideInVertically { it / 2 },
+            exit = fadeOut() + slideOutVertically { it / 2 },
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Add,
-                contentDescription = stringResource(R.string.contentDescription_addTodo),
-            )
+            Box(modifier = Modifier.fillMaxSize()) {
+                FloatingActionButton(
+                    modifier = Modifier
+                        .wrapContentSize()
+                        .align(Alignment.BottomEnd)
+                        .padding(end = 16.dp, bottom = 16.dp),
+                    onClick = {
+                        navController.navigate(Screens.toAddEditScreen())
+                    },
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Add,
+                        contentDescription = stringResource(R.string.contentDescription_addTodo),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TimeTile(
+    modifier: Modifier = Modifier,
+    timePeriod: TimePeriod,
+    timeTileOpen: Boolean,
+    onChangeTimePeriod: (TimePeriod) -> Unit,
+    onOpenTimeTile: (Boolean) -> Unit,
+) {
+    val showTimeOptions = updateTransition(
+        targetState = timeTileOpen,
+        label = "showTimeOptions",
+    )
+    val doteColor by showTimeOptions.animateColor(
+        label = "doteColor",
+    ) { open ->
+        if (open) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer
+    }
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier.size(48.dp),
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
+            showTimeOptions.AnimatedVisibility(
+                modifier = Modifier.fillMaxWidth(),
+                visible = {
+                    it || timePeriod == TimePeriod.Past
+                },
+                enter = fadeIn() + expandVertically(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        onChangeTimePeriod(TimePeriod.Past)
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        disabledContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    enabled = timePeriod != TimePeriod.Past,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowRight,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Past) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Past) doteColor else Color.Transparent,
+                    )
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "Past",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowLeft,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Past) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Past) doteColor else Color.Transparent,
+                    )
+                }
+            }
+            showTimeOptions.AnimatedVisibility(
+                modifier = Modifier.fillMaxWidth(),
+                visible = {
+                    it || timePeriod == TimePeriod.Today
+                },
+                enter = fadeIn() + expandVertically(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        onChangeTimePeriod(TimePeriod.Today)
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        disabledContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    enabled = timePeriod != TimePeriod.Today,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowRight,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Today) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Today) doteColor else Color.Transparent,
+                    )
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "Today",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowLeft,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Today) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Today) doteColor else Color.Transparent,
+                    )
+                }
+            }
+            showTimeOptions.AnimatedVisibility(
+                modifier = Modifier.fillMaxWidth(),
+                visible = {
+                    it || timePeriod == TimePeriod.Future
+                },
+                enter = fadeIn() + expandVertically(),
+                exit = shrinkVertically() + fadeOut(),
+            ) {
+                TextButton(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    onClick = {
+                        onChangeTimePeriod(TimePeriod.Future)
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        disabledContentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    enabled = timePeriod != TimePeriod.Future,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowRight,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Future) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Future) doteColor else Color.Transparent,
+                    )
+                    Text(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        text = "Future",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowLeft,
+                        contentDescription = stringResource(id = if (timePeriod == TimePeriod.Future) R.string.contentDescription_selected else R.string.contentDescription_notSelected),
+                        tint = if (timePeriod == TimePeriod.Future) doteColor else Color.Transparent,
+                    )
+                }
+            }
+        }
+        IconButton(onClick = {
+            onOpenTimeTile(!showTimeOptions.currentState)
+        }) {
+            showTimeOptions.AnimatedContent {
+                when (it) {
+                    true -> {
+                        Icon(
+                            imageVector = Icons.Rounded.ArrowDropUp,
+                            contentDescription = stringResource(id = R.string.contentDescription_closeTime),
+                        )
+                    }
+
+                    false -> {
+                        Icon(
+                            imageVector = Icons.Rounded.AccessTime,
+                            contentDescription = stringResource(id = R.string.contentDescription_openTime),
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -383,14 +520,57 @@ fun TodoList(
     gridCells: GridCells,
     state: TodoListState,
     onNavigate: (Todo) -> Unit,
-    onDone: (Todo, Boolean) -> Unit,
+    onSelect: (Long, Boolean) -> Unit,
+    onSelectRange: (Long, Long, Long) -> Unit,
+    selectionMode: Boolean,
+    onDone: (Todo) -> Unit,
     timePeriod: TimePeriod,
 ) {
-    val shouldShowDates by remember {
+    val lazyGridState = rememberLazyGridState()
+
+    fun todoIdAtOffset(hitPoint: Offset): Long? =
+        lazyGridState.layoutInfo.visibleItemsInfo.find { itemInfo ->
+            itemInfo.size.toIntRect().contains(hitPoint.round() - itemInfo.offset)
+        }?.key as? Long?
+
+    val shouldShowDates by remember(timePeriod, state.todosToday) {
         derivedStateOf { timePeriod != TimePeriod.Today || state.todosToday.size > 1 }
     }
     LazyVerticalGrid(
-        modifier = modifier,
+        modifier = modifier.pointerInput(true) {
+            var initialTodoId: Long? = null
+            var currentTodoId: Long? = null
+            detectDragGesturesAfterLongPress(
+                onDragStart = { offset ->
+                    todoIdAtOffset(offset)?.let {
+                        initialTodoId = it
+                        currentTodoId = it
+                        onSelect(it, true)
+                    }
+                },
+                onDragCancel = {
+                    initialTodoId = null
+                    currentTodoId = null
+                },
+                onDragEnd = {
+                    initialTodoId = null
+                    currentTodoId = null
+                },
+                onDrag = { change, _ ->
+                    todoIdAtOffset(change.position)?.let {
+                        if (it != currentTodoId) {
+                            onSelectRange(
+                                initialTodoId ?: return@let,
+                                currentTodoId ?: return@let,
+                                it,
+                            )
+                            currentTodoId = it
+                        }
+                    }
+                },
+            )
+        },
+        state = lazyGridState,
         columns = gridCells,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -426,18 +606,29 @@ fun TodoList(
                 items = list.value,
                 key = { item -> item.id ?: -1 },
             ) { item ->
-                Box(modifier = Modifier.animateItemPlacement()) {
+                val selected by remember(state.selectedTodos) { derivedStateOf { item.id in state.selectedTodos } }
+                val action: () -> Unit = remember(item) {
+                    { onDone(item) }
+                }
+                Box(
+                    modifier = Modifier
+                        .animateItemPlacement()
+                        .clip(MaterialTheme.shapes.medium)
+                        .then(
+                            if (selectionMode) {
+                                Modifier.clickable {
+                                    onSelect(item.id ?: return@clickable, false)
+                                }
+                            } else {
+                                Modifier.clickable { onNavigate(item) }
+                            },
+                        ),
+                ) {
                     TodoItem(
-                        modifier = Modifier
-                            .combinedClickable(
-                                onClick = { onNavigate(item) },
-                                onLongClick = {
-                                },
-                            ),
                         todo = item,
-                        isSelected = false,
+                        isSelected = selected,
                         listViewType = state.preferences.listViewType,
-                        onDone = { done -> onDone(item, done) },
+                        onDone = action,
                     )
                 }
             }

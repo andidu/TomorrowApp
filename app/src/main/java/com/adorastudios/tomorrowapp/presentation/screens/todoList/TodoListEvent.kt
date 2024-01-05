@@ -16,6 +16,15 @@ sealed class TodoListEvent {
     }
 
     sealed class TodoEvent : TodoListEvent() {
-        data class Done(val todo: Todo, val done: Boolean) : TodoEvent()
+        data class Done(val todo: Todo) : TodoEvent()
+    }
+
+    sealed class SelectionEvent : TodoListEvent() {
+        data class Selected(val id: Long, val forceSelect: Boolean) : SelectionEvent()
+        data class SelectedRange(val initial: Long, val previous: Long, val current: Long) : SelectionEvent()
+        data object Delete : SelectionEvent()
+        data object Check : SelectionEvent()
+        data object Uncheck : SelectionEvent()
+        data object Deselect : SelectionEvent()
     }
 }

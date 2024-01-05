@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.max
+import kotlin.math.min
 
 @HiltViewModel
 class TodoListViewModel @Inject constructor(
@@ -53,10 +55,14 @@ class TodoListViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     todoUseCases.insertTodo(
                         todo = event.todo.copy(
-                            done = event.done,
+                            done = !event.todo.done,
                         ),
                     )
                 }
+            }
+
+            is TodoListEvent.SelectionEvent -> {
+                onEvent(event)
             }
         }
     }
@@ -127,6 +133,101 @@ class TodoListViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     timeTileOpen = event.open,
                 )
+            }
+        }
+    }
+
+    private fun onEvent(event: TodoListEvent.SelectionEvent) {
+        when (event) {
+            TodoListEvent.SelectionEvent.Check -> {
+                val selectedTodos = state.value.selectedTodos.toList()
+                viewModelScope.launch(Dispatchers.IO) {
+                    todoUseCases.updateTodo.invoke(selectedTodos, true)
+                }
+                _state.value = state.value.copy(
+                    selectedTodos = emptySet(),
+                )
+            }
+
+            TodoListEvent.SelectionEvent.Delete -> {
+                val selectedTodos = state.value.selectedTodos.toList()
+                viewModelScope.launch(Dispatchers.IO) {
+                    todoUseCases.deleteTodo.invoke(selectedTodos)
+                }
+                _state.value = state.value.copy(
+                    selectedTodos = emptySet(),
+                )
+            }
+
+            TodoListEvent.SelectionEvent.Deselect -> {
+                _state.value = state.value.copy(
+                    selectedTodos = emptySet(),
+                )
+            }
+
+            is TodoListEvent.SelectionEvent.Selected -> {
+                val selectedSet = mutableSetOf<Long>()
+                selectedSet.addAll(state.value.selectedTodos)
+                if (event.id in selectedSet && !event.forceSelect) {
+                    selectedSet.remove(event.id)
+                } else {
+                    selectedSet.add(event.id)
+                }
+                _state.value = state.value.copy(
+                    selectedTodos = selectedSet,
+                )
+            }
+
+            TodoListEvent.SelectionEvent.Uncheck -> {
+                val selectedTodos = state.value.selectedTodos.toList()
+                viewModelScope.launch(Dispatchers.IO) {
+                    todoUseCases.updateTodo.invoke(selectedTodos, false)
+                }
+                _state.value = state.value.copy(
+                    selectedTodos = emptySet(),
+                )
+            }
+
+            is TodoListEvent.SelectionEvent.SelectedRange -> {
+                val map = when (state.value.timePeriod) {
+                    TimePeriod.Future -> state.value.todosFuture
+                    TimePeriod.Past -> state.value.todosPast
+                    TimePeriod.Today -> state.value.todosToday
+                }
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    val list = map.flatMap { it.value }
+                    val initialIndex =
+                        list.indexOfFirst { it.id == event.initial }.takeIf { it != -1 }
+                            ?: return@launch
+                    val previousIndex =
+                        list.indexOfFirst { it.id == event.previous }.takeIf { it != -1 }
+                            ?: return@launch
+                    val currentIndex =
+                        list.indexOfFirst { it.id == event.current }.takeIf { it != -1 }
+                            ?: return@launch
+
+                    val selectedSet = mutableSetOf<Long>()
+                    selectedSet.addAll(state.value.selectedTodos)
+                    val setToRemove =
+                        list.subList(
+                            min(initialIndex, previousIndex),
+                            max(initialIndex, previousIndex) + 1,
+                        ).mapNotNull { it.id }.toSet()
+                    val setToAdd =
+                        list.subList(
+                            min(initialIndex, currentIndex),
+                            max(initialIndex, currentIndex) + 1,
+                        ).mapNotNull { it.id }
+                    selectedSet.removeAll(setToRemove)
+                    selectedSet.addAll(setToAdd)
+
+                    withContext(Dispatchers.Main) {
+                        _state.value = state.value.copy(
+                            selectedTodos = selectedSet,
+                        )
+                    }
+                }
             }
         }
     }

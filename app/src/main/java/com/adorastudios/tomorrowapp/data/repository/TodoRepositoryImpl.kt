@@ -45,7 +45,15 @@ class TodoRepositoryImpl(private val dao: TodoDao) : TodoRepository {
         dao.insertTodo(todo.toTodoDb())
     }
 
+    override suspend fun updateTodos(ids: List<Long>, done: Boolean) {
+        dao.updateTodos(ids, done)
+    }
+
     override suspend fun deleteTodo(id: Long) {
         dao.deleteTodo(id)
+    }
+
+    override suspend fun deleteTodos(ids: List<Long>) {
+        dao.deleteTodos(ids)
     }
 }

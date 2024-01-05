@@ -36,4 +36,8 @@
     <string name="contentDescription_selected">Selected</string>
     <string name="contentDescription_done">Done</string>
     <string name="contentDescription_notDone">Not done yet</string>
+    <string name="contentDescription_deleteTodos">Delete selected todos</string>
+    <string name="contentDescription_doneTodos">Mark selected todos as done</string>
+    <string name="contentDescription_notDoneTodos">Mark selected todos as not yet done</string>
+    <string name="contentDescription_cancelSelection">Cancel selection</string>
 </resources>

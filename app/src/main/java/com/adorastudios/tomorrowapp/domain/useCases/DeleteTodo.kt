@@ -6,4 +6,7 @@ class DeleteTodo(private val todoRepository: TodoRepository) {
     suspend operator fun invoke(id: Long) {
         todoRepository.deleteTodo(id)
     }
+    suspend operator fun invoke(ids: List<Long>) {
+        todoRepository.deleteTodos(ids)
+    }
 }

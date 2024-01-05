@@ -14,6 +14,7 @@ import com.adorastudios.tomorrowapp.domain.useCases.GetTodo
 import com.adorastudios.tomorrowapp.domain.useCases.GetTodos
 import com.adorastudios.tomorrowapp.domain.useCases.InsertTodo
 import com.adorastudios.tomorrowapp.domain.useCases.TodoUseCases
+import com.adorastudios.tomorrowapp.domain.useCases.UpdateTodo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,6 +45,7 @@ object HiltAppModule {
     fun provideTodoUseCases(repository: TodoRepository): TodoUseCases {
         return TodoUseCases(
             insertTodo = InsertTodo(repository),
+            updateTodo = UpdateTodo(repository),
             deleteTodo = DeleteTodo(repository),
             getTodo = GetTodo(repository),
             getTodos = GetTodos(repository),

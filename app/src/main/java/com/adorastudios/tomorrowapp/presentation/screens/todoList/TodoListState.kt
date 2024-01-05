@@ -13,6 +13,7 @@ data class TodoListState(
     val preferences: Preferences = Preferences(),
     val topTileOpen: Boolean = false,
     val timeTileOpen: Boolean = false,
+    val selectedTodos: Set<Long> = emptySet(),
 )
 
 sealed class TimePeriod {

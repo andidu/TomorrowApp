@@ -34,8 +34,14 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTodo(todo: TodoDb)
 
+    @Query("UPDATE todos SET done=:done WHERE id IN (:ids)")
+    suspend fun updateTodos(ids: List<Long>, done: Boolean)
+
     @Query("DELETE FROM todos WHERE id = :id")
     suspend fun deleteTodo(id: Long)
+
+    @Query("DELETE FROM todos WHERE id IN (:ids)")
+    suspend fun deleteTodos(ids: List<Long>)
 
     @Query("SELECT title FROM todos WHERE due_date <= :day AND done = 0")
     fun getNotFinishedTodoTitles(day: Long): List<String>

@@ -43,7 +43,7 @@ fun TodoItem(
     todo: Todo,
     isSelected: Boolean,
     listViewType: ListViewType,
-    onDone: (Boolean) -> Unit,
+    onDone: () -> Unit,
 ) {
     when (listViewType) {
         ListViewType.SmallGrid -> TodoItemWithContent(
@@ -84,7 +84,7 @@ fun TodoWithNoContent(
     modifier: Modifier = Modifier,
     todo: Todo,
     isSelected: Boolean,
-    onDone: (Boolean) -> Unit,
+    onDone: () -> Unit,
 ) {
     val dark = isSystemInDarkTheme()
 
@@ -102,6 +102,7 @@ fun TodoWithNoContent(
                 type = todo.type,
                 color = todo.color.get(dark),
                 done = todo.done,
+                isSelected = isSelected,
                 onDone = onDone,
             )
         }
@@ -114,7 +115,7 @@ fun TodoItemWithContent(
     todo: Todo,
     isSelected: Boolean,
     fixedRatio: Boolean,
-    onDone: (Boolean) -> Unit,
+    onDone: () -> Unit,
 ) {
     val dark = isSystemInDarkTheme()
     val onSurface by animateColorAsState(
@@ -141,6 +142,7 @@ fun TodoItemWithContent(
                 color = todo.color.get(dark),
                 type = todo.type,
                 done = todo.done,
+                isSelected = isSelected,
                 onDone = onDone,
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -194,7 +196,8 @@ fun TodoItemTitle(
     type: TodoType,
     color: Color,
     done: Boolean,
-    onDone: (Boolean) -> Unit,
+    isSelected: Boolean,
+    onDone: () -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -235,9 +238,8 @@ fun TodoItemTitle(
         Spacer(modifier = Modifier.width(8.dp))
         IconButton(
             modifier = Modifier.size(30.dp),
-            onClick = {
-                onDone(!done)
-            },
+            enabled = !isSelected,
+            onClick = onDone,
         ) {
             Icon(
                 imageVector = if (done) Icons.Rounded.CheckCircleOutline else Icons.Rounded.RadioButtonUnchecked,

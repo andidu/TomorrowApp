@@ -13,6 +13,8 @@ interface TodoRepository {
     suspend fun getTodoById(id: Int): Todo?
 
     suspend fun insertTodo(todo: Todo)
+    suspend fun updateTodos(ids: List<Long>, done: Boolean)
 
     suspend fun deleteTodo(id: Long)
+    suspend fun deleteTodos(ids: List<Long>)
 }
