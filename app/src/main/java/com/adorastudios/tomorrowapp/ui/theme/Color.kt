@@ -2,10 +2,14 @@ package com.adorastudios.tomorrowapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val RedNoteDark = Color(0xffc0392b)
+val YellowNoteDark = Color(0xfff39c12)
+val GreenNoteDark = Color(0xff27ae60)
+val BlueNoteDark = Color(0xff2980b9)
+val PurpleNoteDark = Color(0xff8e44ad)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val RedNoteLight = Color(0xFFF87567)
+val YellowNoteLight = Color(0xFFFADB5D)
+val GreenNoteLight = Color(0xFF61E79B)
+val BlueNoteLight = Color(0xFF54B1F0)
+val PurpleNoteLight = Color(0xFFD17EF3)

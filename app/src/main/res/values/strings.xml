@@ -1,3 +1,39 @@
 <resources>
     <string name="app_name">TomorrowApp</string>
+    <string name="todoListScreen_title">Your Todos</string>
+    <string name="todoListScreen_showOverdueInToday">Show overdue in Today</string>
+    <string name="todoListScreen_moveDoneToPast">Move done to Past</string>
+
+    <string name="addEditTodoScreen_chooseColor">Choose title color:</string>
+    <string name="addEditTodoScreen_chooseType">Choose todo type:</string>
+    <string name="addEditTodoScreen_contentPlaceholder">Todo\'s content</string>
+    <string name="addEditTodoScreen_titlePlaceholder">Todo\'s title</string>
+    <string name="addEditTodoScreen_emptyTitleError">Title should not be empty</string>
+
+    <string name="contentDescription_closeSettings">Close settings tile</string>
+    <string name="contentDescription_openSettings">Open settings tile</string>
+    <string name="contentDescription_closeTime">Close time tile</string>
+    <string name="contentDescription_openTime">Open time tile</string>
+    <string name="contentDescription_titleOnly">Title only</string>
+    <string name="contentDescription_titleAndContent">Title and content</string>
+    <string name="contentDescription_largeGrid">Large grid</string>
+    <string name="contentDescription_smallGrid">Small grid</string>
+    <string name="contentDescription_addTodo">Add todo</string>
+    <string name="contentDescription_deleteTodo">Delete todo</string>
+    <string name="contentDescription_saveTodo">Save todo</string>
+    <string name="contentDescription_work">Work</string>
+    <string name="contentDescription_study">Study</string>
+    <string name="contentDescription_travel">Travel</string>
+    <string name="contentDescription_home">Home</string>
+    <string name="contentDescription_favorite">Favorite</string>
+    <string name="contentDescription_color">Color #%d</string>
+    <string name="contentDescription_colorNone">No color</string>
+    <string name="contentDescription_typeNone">No type</string>
+    <string name="contentDescription_changeDate">Change date</string>
+    <string name="contentDescription_editTypeAndColor">Edit type and color</string>
+    <string name="contentDescription_close">Close</string>
+    <string name="contentDescription_notSelected">Unselected</string>
+    <string name="contentDescription_selected">Selected</string>
+    <string name="contentDescription_done">Done</string>
+    <string name="contentDescription_notDone">Not done yet</string>
 </resources>
