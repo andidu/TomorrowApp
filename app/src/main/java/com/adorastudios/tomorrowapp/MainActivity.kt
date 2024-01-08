@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.adorastudios.tomorrowapp.presentation.screens.Screens
 import com.adorastudios.tomorrowapp.presentation.screens.addEditTodo.AddEditTodoScreen
+import com.adorastudios.tomorrowapp.presentation.screens.notifications.NotificationScreen
 import com.adorastudios.tomorrowapp.presentation.screens.todoList.TodoListScreen
 import com.adorastudios.tomorrowapp.ui.theme.TomorrowAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,6 +61,11 @@ class MainActivity : ComponentActivity() {
                             ),
                         ) {
                             AddEditTodoScreen(navController = navController)
+                        }
+                        composable(
+                            route = Screens.Notifications.route,
+                        ) {
+                            NotificationScreen()
                         }
                     }
                 }

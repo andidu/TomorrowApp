@@ -11,15 +11,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDropUp
+import androidx.compose.material.icons.rounded.EditNotifications
 import androidx.compose.material.icons.rounded.GridOn
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.TableRows
@@ -48,6 +47,7 @@ import com.adorastudios.tomorrowapp.ui.theme.topShape
 fun TopTile(
     topTileOpen: Boolean,
     preferences: Preferences,
+    onNotificationClick: () -> Unit,
     onOpen: (Boolean) -> Unit,
     onOptionSelected: (ListViewType) -> Unit,
     onShowOverdueInTodaySelected: (Boolean) -> Unit,
@@ -75,7 +75,12 @@ fun TopTile(
                 .height(AppTheme.paddings.appBarHeight),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(modifier = Modifier.size(48.dp))
+            IconButton(onClick = onNotificationClick) {
+                Icon(
+                    imageVector = Icons.Rounded.EditNotifications,
+                    contentDescription = stringResource(id = R.string.contentDescription_editNotifications),
+                )
+            }
             Text(
                 modifier = Modifier.weight(1f),
                 text = stringResource(id = R.string.todoListScreen_title),

@@ -8,12 +8,17 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TodoDao {
-    @Query(
-        "SELECT * FROM todos WHERE (due_date=:day AND done=0) OR " +
+    companion object {
+        private const val TODAY_QUERY = "SELECT * FROM todos WHERE (due_date=:day AND done=0) OR " +
             "(:includeDone AND due_date=:day AND done=1) OR " +
-            "(:includeOverdue AND due_date<:day AND done=0)",
-    )
+            "(:includeOverdue AND due_date<:day AND done=0)"
+    }
+
+    @Query(TODAY_QUERY)
     fun getTodayTodos(day: Int, includeDone: Boolean, includeOverdue: Boolean): Flow<List<TodoDb>>
+
+    @Query(TODAY_QUERY)
+    fun getTodayTodosSync(day: Int, includeDone: Boolean, includeOverdue: Boolean): List<TodoDb>
 
     @Query(
         "SELECT * FROM todos WHERE (due_date<:day AND done=1) OR " +

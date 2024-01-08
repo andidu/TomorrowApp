@@ -56,4 +56,12 @@ class TodoRepositoryImpl(private val dao: TodoDao) : TodoRepository {
     override suspend fun deleteTodos(ids: List<Long>) {
         dao.deleteTodos(ids)
     }
+
+    override fun getTodayTodosSync(
+        day: Int,
+        includeDone: Boolean,
+        includeOverdue: Boolean,
+    ): List<Todo> {
+        return dao.getTodayTodosSync(day, includeDone, includeOverdue).map { it.toTodo() }
+    }
 }

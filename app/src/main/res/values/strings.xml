@@ -40,4 +40,30 @@
     <string name="contentDescription_doneTodos">Mark selected todos as done</string>
     <string name="contentDescription_notDoneTodos">Mark selected todos as not yet done</string>
     <string name="contentDescription_cancelSelection">Cancel selection</string>
+    <string name="contentDescription_editNotifications">Edit notifications</string>
+    <string name="contentDescription_delete">Delete</string>
+
+    <string name="notificationsScreen_title">Notifications</string>
+    <string name="notificationsScreen_none">Disabled</string>
+    <string name="notificationsScreen_exact">Exact</string>
+    <string name="notificationsScreen_periodic">Periodic</string>
+    <string name="notificationsScreen_notificationsAreDisabled">Notifications are disabled</string>
+    <string name="notificationsScreen_notificationsAreDisabledMore">If you have troubles turning notifications on, please try giving permission to send them manually in settings</string>
+    <string name="notificationsScreen_goToSettings">Go to settings</string>
+    <string name="notificationsScreen_notificationsExact">You will get notifications at</string>
+    <string name="notificationsScreen_notificationsPeriodic">You will get notifications every</string>
+    <string name="notificationsScreen_sendAtNight">Send at night</string>
+    <string name="notificationsScreen_addNotificationTime">Add time</string>
+    <string name="notificationsScreen_giveExactPermission">Grand \"Tomorrow\" required permission</string>
+    <string name="notificationsScreen_giveExactPermissionExplanation">Default alarms are inexact and are delivered within an hour. If you want notifications to be sent precisely, please grand permission to set alarms and reminders in settings</string>
+    <plurals name="notificationsScreen_xHours">
+        <item quantity="one">%d hour</item>
+        <item quantity="other">%d hours</item>
+    </plurals>
+
+    <string name="notification_titleNotEmpty">You have some tasks to do!</string>
+    <string name="notification_titleEmpty">All the tasks for today are done!</string>
+    <string name="notification_descriptionEmpty">Let\'s set up some new tasks for tomorrow</string>
+    <string name="notification_descriptionLow">"Following tasks await you: "</string>
+    <string name="notification_descriptionMany">" and %d more"</string>
 </resources>

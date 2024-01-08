@@ -99,6 +99,9 @@ fun TodoListScreen(
             TopTile(
                 state.topTileOpen,
                 state.preferences,
+                onNotificationClick = {
+                    navController.navigate(Screens.Notifications.route)
+                },
                 onOpen = {
                     viewModel.onEvent(TodoListEvent.TopTileEvent.OpenTopTile(it))
                 },
