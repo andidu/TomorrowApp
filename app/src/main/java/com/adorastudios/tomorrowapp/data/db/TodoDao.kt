@@ -12,6 +12,8 @@ interface TodoDao {
         private const val TODAY_QUERY = "SELECT * FROM todos WHERE (due_date=:day AND done=0) OR " +
             "(:includeDone AND due_date=:day AND done=1) OR " +
             "(:includeOverdue AND due_date<:day AND done=0)"
+
+        private const val UPDATE_QUERY = "UPDATE todos SET done=:done WHERE id IN (:ids)"
     }
 
     @Query(TODAY_QUERY)
@@ -39,7 +41,7 @@ interface TodoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTodo(todo: TodoDb)
 
-    @Query("UPDATE todos SET done=:done WHERE id IN (:ids)")
+    @Query(UPDATE_QUERY)
     suspend fun updateTodos(ids: List<Long>, done: Boolean)
 
     @Query("DELETE FROM todos WHERE id = :id")
@@ -47,6 +49,9 @@ interface TodoDao {
 
     @Query("DELETE FROM todos WHERE id IN (:ids)")
     suspend fun deleteTodos(ids: List<Long>)
+
+    @Query(UPDATE_QUERY)
+    fun updateTodosSync(ids: List<Long>, done: Boolean)
 
     @Query("SELECT title FROM todos WHERE due_date <= :day AND done = 0")
     fun getNotFinishedTodoTitles(day: Long): List<String>

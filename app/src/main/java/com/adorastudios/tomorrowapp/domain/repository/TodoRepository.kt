@@ -18,5 +18,6 @@ interface TodoRepository {
     suspend fun deleteTodo(id: Long)
     suspend fun deleteTodos(ids: List<Long>)
 
+    fun updateTodosSync(ids: List<Long>, done: Boolean)
     fun getTodayTodosSync(day: Int, includeDone: Boolean, includeOverdue: Boolean): List<Todo>
 }

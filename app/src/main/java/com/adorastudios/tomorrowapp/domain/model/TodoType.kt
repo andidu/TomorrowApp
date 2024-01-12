@@ -65,5 +65,16 @@ sealed class TodoType {
                 else -> Undefined
             }
         }
+
+        fun Int.toTodoIcon(): Int? {
+            return when (this) {
+                1 -> R.drawable.round_work_24
+                2 -> R.drawable.round_school_24
+                3 -> R.drawable.round_airplanemode_active_24
+                4 -> R.drawable.round_home_24
+                5 -> R.drawable.round_favorite_24
+                else -> null
+            }
+        }
     }
 }

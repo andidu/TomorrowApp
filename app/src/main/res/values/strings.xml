@@ -66,4 +66,6 @@
     <string name="notification_descriptionEmpty">Let\'s set up some new tasks for tomorrow</string>
     <string name="notification_descriptionLow">"Following tasks await you: "</string>
     <string name="notification_descriptionMany">" and %d more"</string>
+    <string name="widget_todayTasks">Todo today</string>
+    <string name="contentDescription_update">Update</string>
 </resources>

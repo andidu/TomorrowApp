@@ -42,8 +42,20 @@ fun Int.getDate(): String {
     return SimpleDateFormat.getDateInstance().format(df)
 }
 
+fun Long.getDate(): String {
+    val df = Date(this)
+    return SimpleDateFormat.getDateInstance(DateFormat.FULL).format(df)
+}
+
 fun Int.getTime(): String {
     val df = Date(this * MILLIS_TO_MINUTES)
+    val simpleDateFormat = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
+    simpleDateFormat.timeZone = SimpleTimeZone(0, "UTC")
+    return simpleDateFormat.format(df)
+}
+
+fun Long.getTime(): String {
+    val df = Date(this)
     val simpleDateFormat = SimpleDateFormat.getTimeInstance(DateFormat.SHORT)
     simpleDateFormat.timeZone = SimpleTimeZone(0, "UTC")
     return simpleDateFormat.format(df)

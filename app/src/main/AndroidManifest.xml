@@ -20,6 +20,7 @@
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.TomorrowApp"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,6 +37,17 @@
         <receiver
             android:name=".presentation.screens.notifications.exactNotifications.AlarmReceiver"
             android:enabled="true" />
+
+        <receiver
+            android:name=".presentation.widgets.todoToday.TodoTodayWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/todo_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

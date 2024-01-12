@@ -4,9 +4,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.adorastudios.tomorrowapp.domain.currentTime
+import com.adorastudios.tomorrowapp.domain.model.WidgetTodo.Companion.toWidgetTodo
 import com.adorastudios.tomorrowapp.domain.settings.SettingsRepository
 import com.adorastudios.tomorrowapp.domain.useCases.GetTodos
 import com.adorastudios.tomorrowapp.domain.useCases.TodoUseCases
+import com.adorastudios.tomorrowapp.presentation.widgets.todoToday.TodoTodayWidgetUpdater
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -22,6 +25,7 @@ import kotlin.math.min
 class TodoListViewModel @Inject constructor(
     private val todoUseCases: TodoUseCases,
     private val settingsRepository: SettingsRepository,
+    private val widgetUpdater: TodoTodayWidgetUpdater,
 ) : ViewModel() {
     private val _state = mutableStateOf(TodoListState())
     val state: State<TodoListState> = _state
@@ -250,6 +254,12 @@ class TodoListViewModel @Inject constructor(
             _state.value = state.value.copy(
                 todosToday = it,
             )
+            viewModelScope.launch(Dispatchers.IO) {
+                widgetUpdater.update(
+                    data = it.flatMap { list -> list.value.map { todo -> todo.toWidgetTodo() } },
+                    time = currentTime(),
+                )
+            }
         }.launchIn(viewModelScope)
     }
 

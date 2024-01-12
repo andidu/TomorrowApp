@@ -57,6 +57,10 @@ class TodoRepositoryImpl(private val dao: TodoDao) : TodoRepository {
         dao.deleteTodos(ids)
     }
 
+    override fun updateTodosSync(ids: List<Long>, done: Boolean) {
+        dao.updateTodosSync(ids, done)
+    }
+
     override fun getTodayTodosSync(
         day: Int,
         includeDone: Boolean,
