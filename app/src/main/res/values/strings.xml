@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TomorrowApp</string>
+    <string name="app_name">Tomorrow</string>
     <string name="todoListScreen_title">Your Todos</string>
     <string name="todoListScreen_showOverdueInToday">Show overdue in Today</string>
     <string name="todoListScreen_moveDoneToPast">Move done to Past</string>
