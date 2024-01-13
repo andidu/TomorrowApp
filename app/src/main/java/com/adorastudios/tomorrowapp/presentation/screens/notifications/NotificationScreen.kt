@@ -17,8 +17,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,7 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.adorastudios.tomorrowapp.R
-import com.adorastudios.tomorrowapp.presentation.screens.addEditTodo.components.Scrim
+import com.adorastudios.tomorrowapp.presentation.components.Dialog
 import com.adorastudios.tomorrowapp.presentation.screens.notifications.components.ExactNotificationColumn
 import com.adorastudios.tomorrowapp.presentation.screens.notifications.components.NotificationOption
 import com.adorastudios.tomorrowapp.presentation.screens.notifications.components.PeriodicNotificationColumn
@@ -333,68 +331,40 @@ fun NotificationScreen(
             }
         }
 
-        val dialogTransition = updateTransition(
-            targetState = openTimeDialog,
-            label = "dialog",
-        )
-        dialogTransition.AnimatedVisibility(
-            visible = { it != null },
-            enter = fadeIn(),
-            exit = fadeOut(),
+        Dialog(
+            open = openTimeDialog != null,
+            onClose = {
+                openTimeDialog = null
+            },
         ) {
-            Scrim(
-                modifier = Modifier.fillMaxSize(),
-                onClose = {
-                    openTimeDialog = null
-                },
-            )
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
+            TimePicker(state = timePickerState)
+            Row(
+                modifier = Modifier.align(Alignment.End).padding(0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                dialogTransition.AnimatedVisibility(
-                    visible = { it != null },
-                    enter = slideInVertically { it / 4 },
-                    exit = slideOutVertically { it / 4 },
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .clip(MaterialTheme.shapes.large)
-                            .background(MaterialTheme.colorScheme.background)
-                            .padding(top = 24.dp, bottom = 8.dp)
-                            .padding(horizontal = 16.dp),
-                    ) {
-                        TimePicker(state = timePickerState)
-                        Row(
-                            modifier = Modifier.align(Alignment.End).padding(0.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            TextButton(
-                                onClick = {
-                                    openTimeDialog?.let { index ->
-                                        viewModel.onEvent(
-                                            NotificationEvent.NotificationExactChanged.AddExact(
-                                                id = index,
-                                                time = timePickerState.hour * 60 + timePickerState.minute,
-                                            ),
-                                        )
-                                    }
-
-                                    openTimeDialog = null
-                                },
-                            ) {
-                                Text(stringResource(id = android.R.string.ok))
-                            }
-                            TextButton(
-                                onClick = {
-                                    openTimeDialog = null
-                                },
-                            ) {
-                                Text(stringResource(id = android.R.string.cancel))
-                            }
+                TextButton(
+                    onClick = {
+                        openTimeDialog?.let { index ->
+                            viewModel.onEvent(
+                                NotificationEvent.NotificationExactChanged.AddExact(
+                                    id = index,
+                                    time = timePickerState.hour * 60 + timePickerState.minute,
+                                ),
+                            )
                         }
-                    }
+
+                        openTimeDialog = null
+                    },
+                ) {
+                    Text(stringResource(id = android.R.string.ok))
+                }
+                TextButton(
+                    onClick = {
+                        openTimeDialog = null
+                    },
+                ) {
+                    Text(stringResource(id = android.R.string.cancel))
                 }
             }
         }

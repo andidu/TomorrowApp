@@ -4,8 +4,6 @@ package com.adorastudios.tomorrowapp.presentation.screens.addEditTodo
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -27,7 +25,6 @@ import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -58,7 +55,7 @@ import com.adorastudios.tomorrowapp.domain.currentDay
 import com.adorastudios.tomorrowapp.domain.getDate
 import com.adorastudios.tomorrowapp.domain.model.TodoColor
 import com.adorastudios.tomorrowapp.domain.model.TodoType
-import com.adorastudios.tomorrowapp.presentation.screens.addEditTodo.components.Scrim
+import com.adorastudios.tomorrowapp.presentation.components.Dialog
 import com.adorastudios.tomorrowapp.presentation.screens.todoList.components.EditText
 import com.adorastudios.tomorrowapp.ui.theme.bottomShape
 import com.adorastudios.tomorrowapp.ui.theme.topShape
@@ -346,41 +343,31 @@ fun AddEditTodoScreen(
                 contentDescription = stringResource(R.string.contentDescription_saveTodo),
             )
         }
-        AnimatedVisibility(
-            visible = openDateDialog,
-            enter = fadeIn(),
-            exit = fadeOut(),
+        Dialog(
+            open = openDateDialog,
+            innerPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 0.dp, end = 0.dp),
+            onClose = { openDateDialog = false },
         ) {
-            Scrim(
-                modifier = Modifier.fillMaxSize(),
-                onClose = {
-                    openDateDialog = false
-                },
-            )
-            DatePickerDialog(
-                onDismissRequest = {
-                    openDateDialog = false
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            openDateDialog = false
-                        },
-                    ) {
-                        Text(stringResource(id = android.R.string.ok))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            openDateDialog = false
-                        },
-                    ) {
-                        Text(stringResource(id = android.R.string.cancel))
-                    }
-                },
+            DatePicker(state = datePickerState)
+            Row(
+                modifier = Modifier.align(Alignment.End).padding(0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                DatePicker(state = datePickerState)
+                TextButton(
+                    onClick = {
+                        openDateDialog = false
+                    },
+                ) {
+                    Text(stringResource(id = android.R.string.ok))
+                }
+                TextButton(
+                    onClick = {
+                        openDateDialog = false
+                    },
+                ) {
+                    Text(stringResource(id = android.R.string.cancel))
+                }
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.adorastudios.tomorrowapp.presentation.screens.addEditTodo.components
+package com.adorastudios.tomorrowapp.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
